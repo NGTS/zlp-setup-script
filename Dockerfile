@@ -6,7 +6,8 @@ RUN apt-get update
 RUN apt-get install -y \
         git \
         python \
-        python-pip
+        python-pip \
+        wget
 RUN mkdir -p /pipeline
 ADD setup.py /pipeline/setup.py
 RUN mkdir -p ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
