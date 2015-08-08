@@ -8,6 +8,8 @@ import readline
 import os
 import sys
 from abc import ABCMeta, abstractmethod
+from shlex import split
+import subprocess as sp
 
 # Set up readline for nicer prompt work
 histfile = os.path.join(os.path.expanduser('~'), '.pipeline-install-hist')
@@ -54,6 +56,14 @@ def prompt(question, answers):
 def yesno(question, answers={'y', 'yes', ''}):
     answer = prompt(question, answers)
     return answer.lower() in answers
+
+def shell(command):
+    cmd = split(command)
+    logger.debug('CMD: %s', ' '.join(cmd))
+    sp.check_call(cmd)
+
+# Convenience
+_ = shell
 
 class Task(object):
     __metaclass__ = ABCMeta
