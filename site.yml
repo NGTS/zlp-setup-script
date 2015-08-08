@@ -1,0 +1,23 @@
+---
+- hosts: all
+  tasks:
+  - name: Install required packages
+    apt: name={{ item }} state=present update_cache=yes cache_valid_time=86400
+    with_items:
+    - git
+    - python-pip
+    - wget
+    become: yes
+
+  - name: Ensure .ssh dir exists
+    file: path=~/.ssh state=directory
+
+  - name: Add github known hosts to known_hosts file
+    shell: ssh-keyscan github.com > ~/.ssh/known_hosts creates=~/.ssh/known_hosts
+
+  - name: Ensure pipeline test dir exists
+    file: path=/pipeline state=directory owner=vagrant group=vagrant
+    become: true
+
+  - name: Copy the setup script to pipeline test dir
+    copy: src=setup.py dest=/pipeline/setup.py owner=vagrant group=vagrant mode=0700

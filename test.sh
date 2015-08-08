@@ -2,3 +2,5 @@
 
 
 set -e
+
+vagrant up --provision
