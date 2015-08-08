@@ -95,9 +95,7 @@ class FetchPipeline(Task):
         return os.path.isfile('ZLP_pipeline.sh')
     
     def install(self):
-        _('wget https://github.com/NGTS/zlp-script/archive/master.zip')
-        _('tar xvf master.zip')
-        
+        pass
 
 def main(args):
     if args.verbose:

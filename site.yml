@@ -18,6 +18,3 @@
   - name: Ensure pipeline test dir exists
     file: path=/pipeline state=directory owner=vagrant group=vagrant
     become: true
-
-  - name: Copy the setup script to pipeline test dir
-    copy: src=setup.py dest=/pipeline/setup.py owner=vagrant group=vagrant mode=0700
