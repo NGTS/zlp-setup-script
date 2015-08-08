@@ -6,6 +6,9 @@ import argparse
 import logging
 import readline
 import os
+import sys
+from abc import ABCMeta, abstractmethod
+
 # Set up readline for nicer prompt work
 histfile = os.path.join(os.path.expanduser('~'), '.pipeline-install-hist')
 try:
@@ -52,11 +55,44 @@ def yesno(question, answers={'y', 'yes', ''}):
     answer = prompt(question, answers)
     return answer.lower() in answers
 
+class Task(object):
+    __metaclass__ = ABCMeta
+
+    def pre_install(self):
+        logger.debug('Pre install: %s', self.__class__.__name__)
+
+    def post_install(self):
+        logger.debug('Post install: %s', self.__class__.__name__)
+
+    def complete_condition(self):
+        return False
+
+    @abstractmethod
+    def install(self):
+        pass
+
+    def run(self):
+        self.pre_install()
+        if not self.complete_condition():
+            logger.debug('Complete condition met')
+            self.install
+        self.post_install()
+
+
+class ClonePipelineTask(Task):
+    def complete_condition(self):
+        return os.path.isfile('ZLP_pipeline.sh')
+    
+    def install(self):
+        pass
 
 def main(args):
     if args.verbose:
         logger.setLevel('DEBUG')
-    logger.debug(args)
+
+    ClonePipelineTask().run()
+
+
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
