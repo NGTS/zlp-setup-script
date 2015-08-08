@@ -90,18 +90,20 @@ class Task(object):
         self.post_install()
 
 
-class ClonePipelineTask(Task):
+class FetchPipeline(Task):
     def complete_condition(self):
         return os.path.isfile('ZLP_pipeline.sh')
     
     def install(self):
-        pass
+        _('wget https://github.com/NGTS/zlp-script/archive/master.zip')
+        _('tar xvf master.zip')
+        
 
 def main(args):
     if args.verbose:
         logger.setLevel('DEBUG')
 
-    ClonePipelineTask().run()
+    FetchPipeline().run()
 
 
 
