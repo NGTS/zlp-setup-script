@@ -88,11 +88,18 @@ class Task(object):
 
 
 class FetchPipeline(Task):
+    def __init__(self):
+        self.repo_url = 'https://github.com/NGTS/zlp-script.git'
+
     def complete_condition(self):
         return os.path.isfile('ZLP_pipeline.sh')
     
     def install(self):
-        pass
+        sh('git init')
+        sh('git remote add -t \* -f origin {url}'.format(
+            url=self.repo_url))
+        sh('git checkout master')
+
 
 def main(args):
     if args.verbose:
