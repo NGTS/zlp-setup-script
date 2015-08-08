@@ -84,8 +84,9 @@ class Task(object):
     def run(self):
         self.pre_install()
         if not self.complete_condition():
+            self.install()
+        else:
             logger.debug('Complete condition met')
-            self.install
         self.post_install()
 
 
