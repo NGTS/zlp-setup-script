@@ -9,6 +9,7 @@ RUN apt-get install -y \
         python-pip
 RUN mkdir -p /pipeline
 ADD setup.py /pipeline/setup.py
+RUN mkdir -p ~/.ssh && ssh-keyscan github.com >> ~/.ssh/known_hosts
 WORKDIR /pipeline
 ENTRYPOINT ["python"]
 CMD ["setup.py", "-v"]
