@@ -1,0 +1,4 @@
+= Pipeline setup script
+Simon Walker <s.r.walker101@googlemail.com>
+
+This script installs the whole pipeline, into the current repository.
