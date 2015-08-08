@@ -57,13 +57,10 @@ def yesno(question, answers={'y', 'yes', ''}):
     answer = prompt(question, answers)
     return answer.lower() in answers
 
-def shell(command):
+def sh(command):
     cmd = split(command)
     logger.debug('CMD: %s', ' '.join(cmd))
     sp.check_call(cmd)
-
-# Convenience
-_ = shell
 
 class Task(object):
     __metaclass__ = ABCMeta
