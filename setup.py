@@ -4,6 +4,18 @@
 from __future__ import division, print_function, absolute_import
 import argparse
 import logging
+import readline
+import os
+# Set up readline for nicer prompt work
+histfile = os.path.join(os.path.expanduser('~'), '.pipeline-install-hist')
+try:
+    readline.read_history_file(histfile)
+except IOError:
+    pass
+import atexit
+atexit.register(readline.write_history_file, histfile)
+del histfile
+
 
 logging.basicConfig(
     level='INFO', format='%(levelname)7s %(message)s')
