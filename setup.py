@@ -75,6 +75,9 @@ def sh(command, shell=False):
 class Task(object):
     __metaclass__ = ABCMeta
 
+    def __init__(self, config):
+        self.config = config
+
     def pre_install(self):
         logger.debug('Pre install: %s', self.__class__.__name__)
         return True
@@ -107,7 +110,8 @@ class Task(object):
 
 class FetchPipeline(Task):
 
-    def __init__(self):
+    def __init__(self, config):
+        super(FetchPipeline, self).__init__(config)
         self.repo_url = 'https://github.com/NGTS/zlp-script.git'
 
     def complete_condition(self):
@@ -131,13 +135,14 @@ class FetchSubmodules(Task):
 
 class InstallMiniconda(Task):
 
-    def __init__(self):
+    def __init__(self, config):
+        super(InstallMiniconda, self).__init__(config)
         self.script_stub = 'Miniconda-latest-Linux-x86_64.sh'
         self.download_url = 'https://repo.continuum.io/miniconda/{}'.format(
             self.script_stub)
         self.download_path = os.path.join(tempfile.gettempdir(),
                                           self.script_stub)
-        self.install_path = os.path.expanduser('~/anaconda')
+        self.install_path = self.config['miniconda_install_path']
 
     def complete_condition(self):
         return os.path.isdir(self.install_path)
@@ -154,8 +159,9 @@ class InstallMiniconda(Task):
 
 class InstallPip(Task):
 
-    def __init__(self):
-        self.install_path = os.path.expanduser('~/anaconda')
+    def __init__(self, config):
+        super(InstallPip, self).__init__(config)
+        self.install_path = self.config['miniconda_install_path']
 
     def complete_condition(self):
         return os.path.isfile(os.path.join(self.install_path, 'bin', 'pip'))
@@ -166,19 +172,22 @@ class InstallPip(Task):
 
 class Pipeline(object):
 
-    def __init__(self, tasks):
+    def __init__(self, config, tasks):
+        self.config = config
         self.tasks = tasks
 
     def run(self):
         for task in self.tasks:
-            task().run()
+            task(self.config).run()
 
 
 def main(args):
     if args.verbose:
         logger.setLevel('DEBUG')
 
-    Pipeline([
+    config = {'miniconda_install_path': os.path.expanduser('~/anaconda'),}
+
+    Pipeline(config, [
         FetchPipeline,
         FetchSubmodules,
         InstallMiniconda,
