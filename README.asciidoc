@@ -2,3 +2,15 @@
 Simon Walker <s.r.walker101@googlemail.com>
 
 This script installs the whole pipeline, into the current repository.
+
+== Requirements
+
+The machine you're installing onto only requires the following:
+
+* `git`
+* `python`
+* `wget`
+
+== Development and testing
+
+Included in this repository is a `Vagrantfile` which sets up a debian virtual machine, and provisions the minimal initial requirements listed above.
