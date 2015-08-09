@@ -220,6 +220,20 @@ class UnpackTestData(Task):
         sh('tar xvf {tarball}'.format(tarball=self.tarball_name))
 
 
+class CloneCustomCasutools(Task):
+
+    def __init__(self, config):
+        super(CloneCustomCasutools, self).__init__(config)
+        self.clone_path = 'custom-casutools'
+
+    def complete_condition(self):
+        return os.path.isdir(self.clone_path)
+
+    def install(self):
+        sh('git clone https://github.com/NGTS/custom-casutools.git {}'.format(
+            self.clone_path))
+
+
 class Pipeline(object):
 
     def __init__(self, tasks):
@@ -247,6 +261,8 @@ def main(args):
         InstallPipPackages,
         CopyTestData,
         UnpackTestData,
+        # Have to get wcslib and cfitsio dependencies
+        CloneCustomCasutools,
     ]).run(config)
 
 
