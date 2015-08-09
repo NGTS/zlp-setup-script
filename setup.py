@@ -63,6 +63,7 @@ def yesno(question, answers={'y', 'yes', ''}):
     answer = prompt(question, answers)
     return answer.lower() in answers
 
+
 @contextmanager
 def cd(path):
     old_cwd = os.getcwd()
@@ -71,6 +72,7 @@ def cd(path):
         yield
     finally:
         os.chdir(old_cwd)
+
 
 def sh(command, shell=False):
     if shell:
@@ -174,19 +176,29 @@ class InstallCondaPackages(Task):
     def __init__(self, config):
         super(InstallCondaPackages, self).__init__(config)
         self.install_path = self.config['miniconda_install_path']
+        self.packages = ['astropy', 'ipython', 'jinja2', 'matplotlib',
+        'numpy', 'pip', 'pytest', 'python', 'python-dateutil', 'pytz',
+        'readline', 'scipy', 'setuptools', 'six']
 
     def complete_condition(self):
         return os.path.isfile(os.path.join(self.install_path, 'bin', 'pip'))
 
     def install(self):
-        sh('{}/bin/conda install --yes --file requirements.conda.txt'.format(
-            self.install_path))
+        sh('{path}/bin/conda install --yes {packages}'.format(
+            path=self.install_path,
+            packages = ' '.join(self.packages)))
 
 
 class InstallPipPackages(InstallCondaPackages):
 
+    def __init__(self, config):
+        super(InstallPipPackages, self).__init__(config)
+        self.packages = ['emcee', 'fitsio', 'pycrypto', 'yapf']
+
     def install(self):
-        sh('{}/bin/pip install -r requirements.txt'.format(self.install_path))
+        sh('{path}/bin/pip install {packages}'.format(
+            path=self.install_path,
+            packages=' '.join(self.packages)))
 
     def complete_condition(self):
         return os.path.isdir(os.path.join(self.install_path, 'lib',
@@ -242,16 +254,18 @@ class CloneCustomCasutools(Task):
         sh('git clone https://github.com/NGTS/custom-casutools.git {}'.format(
             self.clone_path))
 
+
 class CompileSource(Task):
+
     def __init__(self, config):
         super(CompileSource, self).__init__(config)
+
 
 class InstallCasutools(Task):
 
     def __init__(self, config):
         super(InstallCasutools, self).__init__(config)
-        self.install_location = os.path.realpath(
-                self.config['install_prefix'])
+        self.install_location = os.path.realpath(self.config['install_prefix'])
         self.clone_path = self.config['casutools_clone_path']
 
     def complete_condition(self):
@@ -261,19 +275,20 @@ class InstallCasutools(Task):
     def install(self):
         with cd(os.path.join(self.clone_path, 'casutools-src')):
             sh('./configure --prefix={prefix} --with-wcs={prefix} '
-            '--with-cfitsio={prefix}'.format(
-                prefix=self.install_location))
+               '--with-cfitsio={prefix}'.format(
+                   prefix=self.install_location))
             sh('make')
             sh('make install')
 
+
 class Compile(Task):
+
     def __init__(self, key):
         self.key = key
 
     def __call__(self, config):
         self.config = config
-        self.prefix = os.path.realpath(
-                self.config['install_prefix'])
+        self.prefix = os.path.realpath(self.config['install_prefix'])
         return self
 
     def pre_install(self):
@@ -288,22 +303,18 @@ class Compile(Task):
         temp_path = tempfile.gettempdir()
         stub = os.path.basename(self.url)
         download_path = os.path.join(temp_path, stub)
-        sh('wget {url} -cO {path}'.format(
-            url=self.url, path=download_path))
+        sh('wget {url} -cO {path}'.format(url=self.url, path=download_path))
         with cd(temp_path):
-            sh('tar xvf {path}'.format(
-                path=stub))
+            sh('tar xvf {path}'.format(path=stub))
             # XXX This needs updating...
             with cd(self.config[self.key]['unpacked_dir']):
                 extra_args = self.config[self.key].get(
-                        'extra_compile_args', '').format(self.prefix)
+                    'extra_compile_args', '').format(self.prefix)
                 sh('./configure --prefix={prefix} {extra_args}'.format(
                     prefix=self.prefix,
                     extra_args=extra_args))
                 sh('make')
                 sh('make install')
-
-
 
 
 class Pipeline(object):
@@ -329,12 +340,13 @@ def main(args):
             'url': 'ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2',
             'complete': '{prefix}/lib/libwcs.a',
             'unpacked_dir': 'wcslib-5.9',
-            },
+        },
         'cfitsio': {
-            'url': 'ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3370.tar.gz',
+            'url':
+            'ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3370.tar.gz',
             'complete': '{prefix}/lib/libcfitsio.a',
             'unpacked_dir': 'cfitsio',
-            },
+        },
     }
 
     Pipeline([

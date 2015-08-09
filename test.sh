@@ -5,9 +5,6 @@ set -e
 
 vagrant up
 vagrant provision
-for file in setup.py requirements*.txt; do
-    echo Uploading file $file
-    cat $file | vagrant ssh -- "cat > /pipeline/$file"
-done
+cat setup.py | vagrant ssh -- "cat > /pipeline/setup.py"
 echo Running test
 vagrant ssh -- -t 'cd /pipeline && python setup.py -v'
