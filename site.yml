@@ -7,6 +7,8 @@
     - git
     - python-pip
     - wget
+    - libcfitsio-dev
+    - wcslib-dev
     become: yes
 
   - name: Ensure .ssh dir exists
