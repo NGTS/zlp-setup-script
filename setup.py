@@ -167,7 +167,7 @@ class InstallPip(Task):
         return os.path.isfile(os.path.join(self.install_path, 'bin', 'pip'))
 
     def install(self):
-        sh('{}/bin/conda install pip'.format(self.install_path))
+        sh('{}/bin/conda install -y pip'.format(self.install_path))
 
 
 class Pipeline(object):
