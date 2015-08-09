@@ -306,7 +306,6 @@ class Compile(Task):
         sh('wget {url} -cO {path}'.format(url=self.url, path=download_path))
         with cd(temp_path):
             sh('tar xvf {path}'.format(path=stub))
-            # XXX This needs updating...
             with cd(self.config[self.key]['unpacked_dir']):
                 extra_args = self.config[self.key].get(
                     'extra_compile_args', '').format(self.prefix)
