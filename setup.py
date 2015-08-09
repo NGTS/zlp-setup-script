@@ -11,6 +11,7 @@ from abc import ABCMeta, abstractmethod
 from shlex import split
 import subprocess as sp
 import tempfile
+import getpass
 
 # Set up readline for nicer prompt work
 histfile = os.path.join(os.path.expanduser('~'), '.pipeline-install-hist')
@@ -182,6 +183,27 @@ class InstallPipPackages(InstallCondaPackages):
                                           'emcee'))
 
 
+class CopyTestData(Task):
+
+    def __init__(self, config):
+        super(CopyTestData, self).__init__(config)
+        self.tarball_name = 'source2015.tar.gz'
+        self.url = 'https://ngts.warwick.ac.uk/twiki/pub/Main/PipelineSetup/source2015.tar.gz'
+
+    def complete_condition(self):
+        return os.path.isfile(self.tarball_name)
+
+    def pre_install(self):
+        self.http_user = raw_prompt('Wiki username:')
+        return True
+
+    def install(self):
+        sh('wget {url} --no-check-certificate '
+        '--http-user {user} --ask-password -cO {dest}'.format(
+            user=self.http_user,
+            url=self.url, dest=self.tarball_name))
+
+
 class Pipeline(object):
 
     def __init__(self, tasks):
@@ -204,6 +226,7 @@ def main(args):
         InstallMiniconda,
         InstallCondaPackages,
         InstallPipPackages,
+        CopyTestData,
     ]).run(config)
 
 
