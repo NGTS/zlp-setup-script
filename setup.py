@@ -172,13 +172,12 @@ class InstallPip(Task):
 
 class Pipeline(object):
 
-    def __init__(self, config, tasks):
-        self.config = config
+    def __init__(self, tasks):
         self.tasks = tasks
 
-    def run(self):
+    def run(self, config):
         for task in self.tasks:
-            task(self.config).run()
+            task(config).run()
 
 
 def main(args):
@@ -187,12 +186,12 @@ def main(args):
 
     config = {'miniconda_install_path': os.path.expanduser('~/anaconda'),}
 
-    Pipeline(config, [
+    Pipeline([
         FetchPipeline,
         FetchSubmodules,
         InstallMiniconda,
         InstallPip,
-    ]).run()
+    ]).run(config)
 
 
 if __name__ == '__main__':
