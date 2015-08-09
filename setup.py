@@ -132,6 +132,8 @@ class FetchSubmodules(Task):
     def install(self):
         sh('git submodule init')
         sh('git submodule update')
+        sh('git submodule foreach git submodule init')
+        sh('git submodule foreach git submodule update')
 
 
 class InstallMiniconda(Task):
