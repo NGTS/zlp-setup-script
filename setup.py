@@ -171,6 +171,17 @@ class InstallCondaPackages(Task):
             self.install_path))
 
 
+class InstallPipPackages(InstallCondaPackages):
+
+    def install(self):
+        sh('{}/bin/pip install -r requirements.txt'.format(self.install_path))
+
+    def complete_condition(self):
+        return os.path.isdir(os.path.join(self.install_path, 'lib',
+                                          'python2.7', 'site-packages',
+                                          'emcee'))
+
+
 class Pipeline(object):
 
     def __init__(self, tasks):
@@ -192,6 +203,7 @@ def main(args):
         FetchSubmodules,
         InstallMiniconda,
         InstallCondaPackages,
+        InstallPipPackages,
     ]).run(config)
 
 

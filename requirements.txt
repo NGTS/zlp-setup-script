@@ -1,0 +1,4 @@
+emcee
+fitsio
+pycrypto
+yapf
