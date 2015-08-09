@@ -100,6 +100,22 @@ class FetchPipeline(Task):
             url=self.repo_url))
         sh('git checkout master')
 
+class FetchSubmodules(Task):
+    def complete_condition(self):
+        return os.path.isfile('scripts/zlp-qa/run.sh')
+    
+    def install(self):
+        sh('git submodule init')
+        sh('git submodule update')
+
+
+class Pipeline(object):
+    def __init__(self, tasks):
+        self.tasks = tasks
+
+    def run(self):
+        for task in self.tasks:
+            task().run()
 
 def main(args):
     if args.verbose:
