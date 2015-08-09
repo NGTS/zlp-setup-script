@@ -187,7 +187,7 @@ class CopyTestData(Task):
 
     def __init__(self, config):
         super(CopyTestData, self).__init__(config)
-        self.tarball_name = 'source2015.tar.gz'
+        self.tarball_name = config['test_data_tarball_path']
         self.url = 'https://ngts.warwick.ac.uk/twiki/pub/Main/PipelineSetup/source2015.tar.gz'
 
     def complete_condition(self):
@@ -199,9 +199,23 @@ class CopyTestData(Task):
 
     def install(self):
         sh('wget {url} --no-check-certificate '
-        '--http-user {user} --ask-password -cO {dest}'.format(
-            user=self.http_user,
-            url=self.url, dest=self.tarball_name))
+           '--http-user {user} --ask-password -cO {dest}'.format(
+               user=self.http_user,
+               url=self.url,
+               dest=self.tarball_name))
+
+
+class UnpackTestData(Task):
+
+    def __init__(self, config):
+        super(UnpackTestData, self).__init__(config)
+        self.tarball_name = config['test_data_tarball_path']
+
+    def complete_condition(self):
+        return os.path.isdir('source2015')
+
+    def install(self):
+        sh('tar xvf {tarball}'.format(tarball=self.tarball_name))
 
 
 class Pipeline(object):
@@ -218,7 +232,10 @@ def main(args):
     if args.verbose:
         logger.setLevel('DEBUG')
 
-    config = {'miniconda_install_path': os.path.expanduser('~/anaconda'),}
+    config = {
+        'miniconda_install_path': os.path.expanduser('~/anaconda'),
+        'test_data_tarball_path': 'source2015.tar.gz'
+    }
 
     Pipeline([
         FetchPipeline,
@@ -227,6 +244,7 @@ def main(args):
         InstallCondaPackages,
         InstallPipPackages,
         CopyTestData,
+        UnpackTestData,
     ]).run(config)
 
 
