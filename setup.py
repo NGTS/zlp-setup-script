@@ -327,6 +327,23 @@ class Pipeline(object):
             task(config).run()
 
 
+def print_environment_setup(config):
+    prefix = os.path.realpath(config['install_prefix'])
+    miniconda = os.path.realpath(config['miniconda_install_path'])
+
+    text = '''To complete the installation, ensure that
+
+    {prefix}/bin and
+    {miniconda}/bin
+
+are on your PATH, and
+
+    {prefix}/lib
+
+is on your LD_LIBRARY_PATH'''.format(miniconda=miniconda, prefix=prefix)
+    logger.info(text)
+
+
 def main(args):
     if args.verbose:
         logger.setLevel('DEBUG')
@@ -362,6 +379,8 @@ def main(args):
         CloneCustomCasutools,
         InstallCasutools,
     ]).run(config)
+
+    print_environment_setup(config)
 
 
 if __name__ == '__main__':
