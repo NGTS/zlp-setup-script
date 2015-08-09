@@ -93,7 +93,7 @@ class FetchPipeline(Task):
 
     def complete_condition(self):
         return os.path.isfile('ZLP_pipeline.sh')
-    
+
     def install(self):
         sh('git init')
         sh('git remote add -t \* -f origin {url}'.format(
@@ -121,7 +121,10 @@ def main(args):
     if args.verbose:
         logger.setLevel('DEBUG')
 
-    FetchPipeline().run()
+    Pipeline([
+        FetchPipeline,
+        FetchSubmodules,
+        ]).run()
 
 
 
