@@ -157,17 +157,18 @@ class InstallMiniconda(Task):
         return True
 
 
-class InstallPip(Task):
+class InstallCondaPackages(Task):
 
     def __init__(self, config):
-        super(InstallPip, self).__init__(config)
+        super(InstallCondaPackages, self).__init__(config)
         self.install_path = self.config['miniconda_install_path']
 
     def complete_condition(self):
         return os.path.isfile(os.path.join(self.install_path, 'bin', 'pip'))
 
     def install(self):
-        sh('{}/bin/conda install -y pip'.format(self.install_path))
+        sh('{}/bin/conda install --yes --file requirements.conda.txt'.format(
+            self.install_path))
 
 
 class Pipeline(object):
@@ -190,7 +191,7 @@ def main(args):
         FetchPipeline,
         FetchSubmodules,
         InstallMiniconda,
-        InstallPip,
+        InstallCondaPackages,
     ]).run(config)
 
 

@@ -1,0 +1,14 @@
+astropy
+ipython
+jinja2
+matplotlib
+numpy
+pip
+pytest
+python
+python-dateutil
+pytz
+readline
+scipy
+setuptools
+six
