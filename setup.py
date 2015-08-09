@@ -12,6 +12,7 @@ from shlex import split
 import subprocess as sp
 import tempfile
 import getpass
+from contextlib import contextmanager
 
 # Set up readline for nicer prompt work
 histfile = os.path.join(os.path.expanduser('~'), '.pipeline-install-hist')
@@ -62,6 +63,14 @@ def yesno(question, answers={'y', 'yes', ''}):
     answer = prompt(question, answers)
     return answer.lower() in answers
 
+@contextmanager
+def cd(path):
+    old_cwd = os.getcwd()
+    try:
+        os.chdir(path)
+        yield
+    finally:
+        os.chdir(old_cwd)
 
 def sh(command, shell=False):
     if shell:
@@ -224,7 +233,7 @@ class CloneCustomCasutools(Task):
 
     def __init__(self, config):
         super(CloneCustomCasutools, self).__init__(config)
-        self.clone_path = 'custom-casutools'
+        self.clone_path = self.config['casutools_clone_path']
 
     def complete_condition(self):
         return os.path.isdir(self.clone_path)
@@ -232,6 +241,69 @@ class CloneCustomCasutools(Task):
     def install(self):
         sh('git clone https://github.com/NGTS/custom-casutools.git {}'.format(
             self.clone_path))
+
+class CompileSource(Task):
+    def __init__(self, config):
+        super(CompileSource, self).__init__(config)
+
+class InstallCasutools(Task):
+
+    def __init__(self, config):
+        super(InstallCasutools, self).__init__(config)
+        self.install_location = os.path.realpath(
+                self.config['install_prefix'])
+        self.clone_path = self.config['casutools_clone_path']
+
+    def complete_condition(self):
+        return os.path.isfile(
+            os.path.join(self.install_location, 'bin', 'imcore'))
+
+    def install(self):
+        with cd(os.path.join(self.clone_path, 'casutools-src')):
+            sh('./configure --prefix={prefix} --with-wcs={prefix} '
+            '--with-cfitsio={prefix}'.format(
+                prefix=self.install_location))
+            sh('make')
+            sh('make install')
+
+class Compile(Task):
+    def __init__(self, key):
+        self.key = key
+
+    def __call__(self, config):
+        self.config = config
+        self.prefix = os.path.realpath(
+                self.config['install_prefix'])
+        return self
+
+    def pre_install(self):
+        self.url = self.config[self.key]['url']
+        return True
+
+    def complete_condition(self):
+        return os.path.isfile(self.config[self.key]['complete'].format(
+            prefix=self.prefix))
+
+    def install(self):
+        temp_path = tempfile.gettempdir()
+        stub = os.path.basename(self.url)
+        download_path = os.path.join(temp_path, stub)
+        sh('wget {url} -cO {path}'.format(
+            url=self.url, path=download_path))
+        with cd(temp_path):
+            sh('tar xvf {path}'.format(
+                path=stub))
+            # XXX This needs updating...
+            with cd(self.config[self.key]['unpacked_dir']):
+                extra_args = self.config[self.key].get(
+                        'extra_compile_args', '').format(self.prefix)
+                sh('./configure --prefix={prefix} {extra_args}'.format(
+                    prefix=self.prefix,
+                    extra_args=extra_args))
+                sh('make')
+                sh('make install')
+
+
 
 
 class Pipeline(object):
@@ -250,7 +322,19 @@ def main(args):
 
     config = {
         'miniconda_install_path': os.path.expanduser('~/anaconda'),
-        'test_data_tarball_path': 'source2015.tar.gz'
+        'test_data_tarball_path': 'source2015.tar.gz',
+        'casutools_clone_path': 'casutools',
+        'install_prefix': '.',
+        'wcslib': {
+            'url': 'ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2',
+            'complete': '{prefix}/lib/libwcs.a',
+            'unpacked_dir': 'wcslib-5.9',
+            },
+        'cfitsio': {
+            'url': 'ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3370.tar.gz',
+            'complete': '{prefix}/lib/libcfitsio.a',
+            'unpacked_dir': 'cfitsio',
+            },
     }
 
     Pipeline([
@@ -261,8 +345,10 @@ def main(args):
         InstallPipPackages,
         CopyTestData,
         UnpackTestData,
-        # Have to get wcslib and cfitsio dependencies
+        Compile('cfitsio'),
+        Compile('wcslib'),
         CloneCustomCasutools,
+        InstallCasutools,
     ]).run(config)
 
 
