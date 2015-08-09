@@ -10,6 +10,7 @@ import sys
 from abc import ABCMeta, abstractmethod
 from shlex import split
 import subprocess as sp
+import tempfile
 
 # Set up readline for nicer prompt work
 histfile = os.path.join(os.path.expanduser('~'), '.pipeline-install-hist')
@@ -27,6 +28,7 @@ if sys.version_info.major == 3:
 else:
     raw_prompt = raw_input
 
+
 class PrintInColor(object):
     RED = '\033[91m'
     GREEN = '\033[92m'
@@ -43,9 +45,10 @@ class PrintInColor(object):
     def status(cls, s):
         return cls.GREEN + s + cls.END
 
-logging.basicConfig(
-    level='INFO', format='%(levelname)7s %(message)s')
+
+logging.basicConfig(level='INFO', format='%(levelname)7s %(message)s')
 logger = logging.getLogger(__name__)
+
 
 def prompt(question, answers):
     if question[-1] != ' ':
@@ -53,23 +56,32 @@ def prompt(question, answers):
 
     return raw_prompt(question)
 
+
 def yesno(question, answers={'y', 'yes', ''}):
     answer = prompt(question, answers)
     return answer.lower() in answers
 
-def sh(command):
-    cmd = split(command)
-    logger.debug('CMD: %s', ' '.join(cmd))
-    sp.check_call(cmd)
+
+def sh(command, shell=False):
+    if shell:
+        logger.debug('CMD: %s', command)
+        sp.check_call(command, shell=True)
+    else:
+        cmd = split(command)
+        logger.debug('CMD: %s', ' '.join(cmd))
+        sp.check_call(cmd)
+
 
 class Task(object):
     __metaclass__ = ABCMeta
 
     def pre_install(self):
         logger.debug('Pre install: %s', self.__class__.__name__)
+        return True
 
     def post_install(self):
         logger.debug('Post install: %s', self.__class__.__name__)
+        return True
 
     def complete_condition(self):
         return False
@@ -79,15 +91,22 @@ class Task(object):
         pass
 
     def run(self):
-        self.pre_install()
+        logger.info(PrintInColor.status('Running task %s'),
+                    self.__class__.__name__)
         if not self.complete_condition():
-            self.install()
+            to_install = self.pre_install()
+
+            if to_install:
+                self.install()
+                self.post_install()
+            else:
+                logger.info('Skipping')
         else:
-            logger.debug('Complete condition met')
-        self.post_install()
+            logger.info('Complete condition met')
 
 
 class FetchPipeline(Task):
+
     def __init__(self):
         self.repo_url = 'https://github.com/NGTS/zlp-script.git'
 
@@ -96,26 +115,64 @@ class FetchPipeline(Task):
 
     def install(self):
         sh('git init')
-        sh('git remote add -t \* -f origin {url}'.format(
-            url=self.repo_url))
+        sh('git remote add -t \* -f origin {url}'.format(url=self.repo_url))
         sh('git checkout master')
 
+
 class FetchSubmodules(Task):
+
     def complete_condition(self):
         return os.path.isfile('scripts/zlp-qa/run.sh')
-    
+
     def install(self):
         sh('git submodule init')
         sh('git submodule update')
 
 
+class InstallMiniconda(Task):
+
+    def __init__(self):
+        self.script_stub = 'Miniconda-latest-Linux-x86_64.sh'
+        self.download_url = 'https://repo.continuum.io/miniconda/{}'.format(
+            self.script_stub)
+        self.download_path = os.path.join(tempfile.gettempdir(),
+                                          self.script_stub)
+        self.install_path = os.path.expanduser('~/anaconda')
+
+    def complete_condition(self):
+        return os.path.isdir(self.install_path)
+
+    def install(self):
+        sh('wget -c {} -O {}'.format(self.download_url, self.download_path))
+        sh('chmod +x {}'.format(self.download_path))
+        sh('{} -b -p {}'.format(self.download_path, self.install_path))
+
+    def pre_install(self):
+        # return yesno('Install miniconda to ~/anaconda? [Y/n]')
+        return True
+
+
+class InstallPip(Task):
+
+    def __init__(self):
+        self.install_path = os.path.expanduser('~/anaconda')
+
+    def complete_condition(self):
+        return os.path.isfile(os.path.join(self.install_path, 'bin', 'pip'))
+
+    def install(self):
+        sh('{}/bin/conda install pip'.format(self.install_path))
+
+
 class Pipeline(object):
+
     def __init__(self, tasks):
         self.tasks = tasks
 
     def run(self):
         for task in self.tasks:
             task().run()
+
 
 def main(args):
     if args.verbose:
@@ -124,8 +181,9 @@ def main(args):
     Pipeline([
         FetchPipeline,
         FetchSubmodules,
-        ]).run()
-
+        InstallMiniconda,
+        InstallPip,
+    ]).run()
 
 
 if __name__ == '__main__':
