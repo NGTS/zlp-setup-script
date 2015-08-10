@@ -379,6 +379,37 @@ class InstallCASUDetrender(Task):
                shell=True)
 
 
+class InstallSysrem(Task):
+
+    def __init__(self, config):
+        super(InstallSysrem, self).__init__(config)
+        self.prefix = os.path.realpath(self.config['install_prefix'])
+
+    def complete_condition(self):
+        return os.path.isfile(os.path.join(self.prefix, 'bin',
+            'sysrem'))
+
+    def install(self):
+        with cd('sysrem'):
+            # Add make variables for this system
+            hostname = sp.check_output(['hostname', '-s']).strip()
+            text = '''CFITSIODIR := /pipeline
+CC := g++
+FORT := gfortran
+
+FORTFLAGS := -ffixed-line-length=132
+COMMON := -fopenmp -O2
+'''
+            with open('Makefile.{hostname}'.format(
+                hostname=hostname), 'w') as outfile:
+                outfile.write(text)
+
+            sh('make -j {:d}'.format(cpu_count()))
+            sh('make install PREFIX={prefix}'.format(
+                prefix=self.prefix))
+
+
+
 class Pipeline(object):
 
     def __init__(self, tasks):
@@ -445,6 +476,7 @@ def main(args):
         CloneCASUDetrender,
         InstallCASUDetrender,
         CloneSysrem,
+        InstallSysrem,
     ]).run(config)
 
     print_environment_setup(config)
