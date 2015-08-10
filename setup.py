@@ -316,6 +316,24 @@ class Compile(Task):
                 sh('make -j {:d}'.format(cpu_count()))
                 sh('make install')
 
+class CloneCASUDetrender(Task):
+    def __init__(self, config):
+        super(CloneCASUDetrender, self).__init__(config)
+        self.hostname = 'ngtshead.warwick.ac.uk'
+        self.repo = '/home/sw/git/casu-lightcurves.git'
+
+    def complete_condition(self):
+        return os.path.isdir('casu-lightcurves')
+
+    def pre_install(self):
+        self.username = raw_prompt('ngtshead user name: ')
+        return True
+
+    def install(self):
+        sh('git clone {user}@{hostname}:{repo}'.format(
+            user=self.username,
+            hostname=self.hostname,
+            repo=self.repo))
 
 class Pipeline(object):
 
@@ -378,6 +396,7 @@ def main(args):
         Compile('wcslib'),
         CloneCustomCasutools,
         InstallCasutools,
+        CloneCASUDetrender,
     ]).run(config)
 
     print_environment_setup(config)
