@@ -194,7 +194,7 @@ class InstallPipPackages(InstallCondaPackages):
 
     def __init__(self, config):
         super(InstallPipPackages, self).__init__(config)
-        self.packages = ['emcee', 'fitsio', 'pycrypto', 'yapf']
+        self.packages = ['emcee', 'fitsio', 'pycrypto']
 
     def install(self):
         sh('{path}/bin/pip install {packages}'.format(
