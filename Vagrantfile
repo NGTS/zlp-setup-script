@@ -10,4 +10,7 @@ Vagrant.configure(2) do |config|
   config.vm.provision "ansible" do |ansible|
     ansible.playbook = 'site.yml'
   end
+  config.vm.provider "virtualbox" do |vb|
+    vb.cpus = 2
+  end
 end
