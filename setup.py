@@ -338,6 +338,27 @@ class CloneCASUDetrender(Task):
             sh('git submodule update')
 
 
+class InstallCASUDetrender(Task):
+
+    def __init__(self, config):
+        super(InstallCASUDetrender, self).__init__(config)
+        self.prefix = os.path.realpath(self.config['install_prefix'])
+
+    def complete_condition(self):
+        return os.path.isfile(os.path.join(self.prefix, 'bin',
+                                           'lightcurves-casu'))
+
+    def install(self):
+        with cd('casu-lightcurves'):
+            sh('PKG_CONFIG_PATH=/pipeline/lib/pkgconfig make PREFIX={prefix} '
+               'PGPLOT_INC= PGPLOT_LIBS= PGPLOT_SRCS='.format(
+                   prefix=self.prefix),
+               shell=True)
+            sh('PKG_CONFIG_PATH=/pipeline/lib/pkgconfig make PREFIX={prefix} '
+               'PGPLOT_INC= PGPLOT_LIBS= PGPLOT_SRCS= install'.format(
+                   prefix=self.prefix),
+               shell=True)
+
 
 class Pipeline(object):
 
@@ -402,6 +423,7 @@ def main(args):
         CloneCustomCasutools,
         InstallCasutools,
         CloneCASUDetrender,
+        InstallCASUDetrender,
     ]).run(config)
 
     print_environment_setup(config)
