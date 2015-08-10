@@ -3,6 +3,17 @@ Simon Walker <s.r.walker101@googlemail.com>
 
 This script installs the whole pipeline, into the current repository.
 
+To install the pipeline into the current directory, run the `setup.py` script. This downloads everything and compiles all required programs.
+
+Afterwards you need to add to your .bashrc:
+
+[source,sh]
+----
+# <dir> is the location you installed to
+export PATH=${HOME}/anaconda/bin:${PATH}:<dir>/bin
+export LD_LIBRARY_PATH=<dir>/lib:${LD_LIBRARY_PATH}
+----
+
 == Requirements
 
 The machine you're installing onto only requires the following:
