@@ -10,6 +10,9 @@ The machine you're installing onto only requires the following:
 * `git`
 * `python`
 * `wget`
+* `pkg-config`
+* `gfortran`
+* `g++`
 
 == Development and testing
 
