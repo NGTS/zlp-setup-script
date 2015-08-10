@@ -187,7 +187,7 @@ class InstallCondaPackages(Task):
     def install(self):
         sh('{path}/bin/conda install --yes {packages}'.format(
             path=self.install_path,
-            packages = ' '.join(self.packages)))
+            packages=' '.join(self.packages)))
 
 
 class InstallPipPackages(InstallCondaPackages):
@@ -338,6 +338,25 @@ class CloneCASUDetrender(Task):
             sh('git submodule update')
 
 
+class CloneSysrem(Task):
+
+    def __init__(self, config):
+        super(CloneSysrem, self).__init__(config)
+
+        self.hostname = 'ngtshead.warwick.ac.uk'
+        self.repo = '/home/sw/git/sysrem.git'
+        self.username = self.config['ngtshead_username']
+
+    def complete_condition(self):
+        return os.path.isdir('sysrem')
+
+    def install(self):
+        sh('git clone {user}@{hostname}:{repo}'.format(
+            user=self.username,
+            hostname=self.hostname,
+            repo=self.repo))
+
+
 class InstallCASUDetrender(Task):
 
     def __init__(self, config):
@@ -383,7 +402,8 @@ are on your PATH, and
 
     {prefix}/lib
 
-is on your LD_LIBRARY_PATH'''.format(miniconda=miniconda, prefix=prefix)
+is on your LD_LIBRARY_PATH'''.format(miniconda=miniconda,
+                                     prefix=prefix)
     logger.info(text)
 
 
@@ -424,6 +444,7 @@ def main(args):
         InstallCasutools,
         CloneCASUDetrender,
         InstallCASUDetrender,
+        CloneSysrem,
     ]).run(config)
 
     print_environment_setup(config)
