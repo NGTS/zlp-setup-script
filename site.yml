@@ -7,6 +7,9 @@
     - git
     - python
     - wget
+    - pkg-config
+    - gfortran
+    - g++
     become: yes
 
   - name: Ensure .ssh dir exists
