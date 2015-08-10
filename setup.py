@@ -5,6 +5,7 @@ from __future__ import division, print_function, absolute_import
 import argparse
 import logging
 import readline
+from multiprocessing import cpu_count
 import os
 import sys
 from abc import ABCMeta, abstractmethod
@@ -277,7 +278,7 @@ class InstallCasutools(Task):
             sh('./configure --prefix={prefix} --with-wcs={prefix} '
                '--with-cfitsio={prefix}'.format(
                    prefix=self.install_location))
-            sh('make')
+            sh('make -j {:d}'.format(cpu_count()))
             sh('make install')
 
 
@@ -312,7 +313,7 @@ class Compile(Task):
                 sh('./configure --prefix={prefix} {extra_args}'.format(
                     prefix=self.prefix,
                     extra_args=extra_args))
-                sh('make')
+                sh('make -j {:d}'.format(cpu_count()))
                 sh('make install')
 
 
