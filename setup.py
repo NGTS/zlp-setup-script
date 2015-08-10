@@ -369,11 +369,11 @@ class InstallCASUDetrender(Task):
 
     def install(self):
         with cd('casu-lightcurves'):
-            sh('PKG_CONFIG_PATH=/pipeline/lib/pkgconfig make PREFIX={prefix} '
+            sh('PKG_CONFIG_PATH={prefix}/lib/pkgconfig make PREFIX={prefix} '
                'PGPLOT_INC= PGPLOT_LIBS= PGPLOT_SRCS='.format(
                    prefix=self.prefix),
                shell=True)
-            sh('PKG_CONFIG_PATH=/pipeline/lib/pkgconfig make PREFIX={prefix} '
+            sh('PKG_CONFIG_PATH={prefix}/lib/pkgconfig make PREFIX={prefix} '
                'PGPLOT_INC= PGPLOT_LIBS= PGPLOT_SRCS= install'.format(
                    prefix=self.prefix),
                shell=True)
@@ -393,13 +393,13 @@ class InstallSysrem(Task):
         with cd('sysrem'):
             # Add make variables for this system
             hostname = sp.check_output(['hostname', '-s']).strip()
-            text = '''CFITSIODIR := /pipeline
+            text = '''CFITSIODIR := {prefix}
 CC := g++
 FORT := gfortran
 
 FORTFLAGS := -ffixed-line-length=132
 COMMON := -fopenmp -O2
-'''
+'''.format(prefix=self.prefix)
             with open('Makefile.{hostname}'.format(
                 hostname=hostname), 'w') as outfile:
                 outfile.write(text)
