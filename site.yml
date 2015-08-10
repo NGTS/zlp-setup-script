@@ -12,9 +12,6 @@
   - name: Ensure .ssh dir exists
     file: path=~/.ssh state=directory
 
-  - name: Add github known hosts to known_hosts file
-    shell: ssh-keyscan github.com > ~/.ssh/known_hosts creates=~/.ssh/known_hosts
-
   - name: Ensure pipeline test dir exists
     file: path=/pipeline state=directory owner=vagrant group=vagrant
     become: true
