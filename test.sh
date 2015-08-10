@@ -7,4 +7,4 @@ vagrant up
 vagrant provision
 cat setup.py | vagrant ssh -- "cat > /pipeline/setup.py"
 echo Running test
-vagrant ssh -- -t 'cd /pipeline && python setup.py -v'
+vagrant ssh -- -t 'cd /pipeline && time python setup.py -v'
