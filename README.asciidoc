@@ -14,6 +14,17 @@ export PATH=${HOME}/anaconda/bin:${PATH}:<dir>/bin
 export LD_LIBRARY_PATH=<dir>/lib:${LD_LIBRARY_PATH}
 ----
 
+You may need to edit the commands in the script if it does not completely work. Hopefully the script has been written in a fairly easy to change style. The actual commands are run with the `sh` function which simply takes a string containing the bash command to run. For example:
+
+[source,python]
+----
+# CD into casu-lightcurves directory and initialise submodules
+with cd('casu-lightcurves'):
+    sh('git submodule init')
+    sh('git submodule update')
+----
+
+
 == Requirements
 
 The machine you're installing onto only requires the following:
