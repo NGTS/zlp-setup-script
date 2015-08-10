@@ -177,9 +177,9 @@ class InstallCondaPackages(Task):
     def __init__(self, config):
         super(InstallCondaPackages, self).__init__(config)
         self.install_path = self.config['miniconda_install_path']
-        self.packages = ['astropy', 'ipython', 'jinja2', 'matplotlib',
-        'numpy', 'pip', 'pytest', 'python', 'python-dateutil', 'pytz',
-        'readline', 'scipy', 'setuptools', 'six']
+        self.packages = ['astropy', 'ipython', 'jinja2', 'matplotlib', 'numpy',
+                         'pip', 'pytest', 'python', 'python-dateutil', 'pytz',
+                         'readline', 'scipy', 'setuptools', 'six']
 
     def complete_condition(self):
         return os.path.isfile(os.path.join(self.install_path, 'bin', 'pip'))
@@ -316,24 +316,28 @@ class Compile(Task):
                 sh('make -j {:d}'.format(cpu_count()))
                 sh('make install')
 
+
 class CloneCASUDetrender(Task):
+
     def __init__(self, config):
         super(CloneCASUDetrender, self).__init__(config)
         self.hostname = 'ngtshead.warwick.ac.uk'
         self.repo = '/home/sw/git/casu-lightcurves.git'
+        self.username = self.config['ngtshead_username']
 
     def complete_condition(self):
         return os.path.isdir('casu-lightcurves')
-
-    def pre_install(self):
-        self.username = raw_prompt('ngtshead user name: ')
-        return True
 
     def install(self):
         sh('git clone {user}@{hostname}:{repo}'.format(
             user=self.username,
             hostname=self.hostname,
             repo=self.repo))
+        with cd('casu-lightcurves'):
+            sh('git submodule init')
+            sh('git submodule update')
+
+
 
 class Pipeline(object):
 
@@ -370,6 +374,7 @@ def main(args):
         'miniconda_install_path': os.path.expanduser('~/anaconda'),
         'test_data_tarball_path': 'source2015.tar.gz',
         'casutools_clone_path': 'casutools',
+        'ngtshead_username': raw_prompt('ngtshead user name:'),
         'install_prefix': '.',
         'wcslib': {
             'url': 'ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2',
