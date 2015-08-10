@@ -446,7 +446,7 @@ def main(args):
         'miniconda_install_path': os.path.expanduser('~/anaconda'),
         'test_data_tarball_path': 'source2015.tar.gz',
         'casutools_clone_path': 'casutools',
-        'ngtshead_username': raw_prompt('ngtshead user name:'),
+        'ngtshead_username': raw_prompt('ngtshead user name: '),
         'install_prefix': '.',
         'wcslib': {
             'url': 'ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2',
