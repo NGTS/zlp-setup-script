@@ -10,7 +10,7 @@ Afterwards you need to add to your .bashrc:
 [source,sh]
 ----
 # <dir> is the location you installed to
-export PATH=${HOME}/anaconda/bin:${PATH}:<dir>/bin
+export PATH=${HOME}/anaconda/bin:<dir>/bin:${PATH}
 export LD_LIBRARY_PATH=<dir>/lib:${LD_LIBRARY_PATH}
 ----
 
