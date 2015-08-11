@@ -3,7 +3,7 @@ Simon Walker <s.r.walker101@googlemail.com>
 
 This script installs the whole pipeline, into the current repository.
 
-To install the pipeline into the current directory, run the `setup.py` script. This downloads everything and compiles all required programs.
+*To install the pipeline into the current directory, run the `setup.py` script. This downloads everything and compiles all required programs.*
 
 Afterwards you need to add to your .bashrc:
 
