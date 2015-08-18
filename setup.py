@@ -25,9 +25,13 @@ atexit.register(readline.write_history_file, histfile)
 del histfile
 
 # Python 3
-if sys.version_info.major == 3:
-    raw_prompt = input
-else:
+try:
+    if sys.version_info.major == 3:
+        raw_prompt = input
+    else:
+        raw_prompt = raw_input
+except AttributeError:
+    # Python <=2.6 :(
     raw_prompt = raw_input
 
 
@@ -59,7 +63,7 @@ def prompt(question, answers):
     return raw_prompt(question)
 
 
-def yesno(question, answers={'y', 'yes', ''}):
+def yesno(question, answers=set(['y', 'yes', ''])):
     answer = prompt(question, answers)
     return answer.lower() in answers
 
@@ -152,8 +156,8 @@ class InstallMiniconda(Task):
     def __init__(self, config):
         super(InstallMiniconda, self).__init__(config)
         self.script_stub = 'Miniconda-latest-Linux-x86_64.sh'
-        self.download_url = 'https://repo.continuum.io/miniconda/{}'.format(
-            self.script_stub)
+        self.download_url = 'https://repo.continuum.io/miniconda/{stub}'.format(
+            stub=self.script_stub)
         self.download_path = os.path.join(tempfile.gettempdir(),
                                           self.script_stub)
         self.install_path = self.config['miniconda_install_path']
@@ -162,13 +166,15 @@ class InstallMiniconda(Task):
         return os.path.isdir(self.install_path)
 
     def install(self):
-        sh('wget -c {} -O {}'.format(self.download_url, self.download_path))
-        sh('chmod +x {}'.format(self.download_path))
-        sh('{} -b -p {}'.format(self.download_path, self.install_path))
+        sh('wget -c {url} -O {path}'.format(url=self.download_url,
+            path=self.download_path))
+        sh('chmod +x {path}'.format(path=self.download_path))
+        sh('{download} -b -p {install}'.format(
+            download=self.download_path,
+            install=self.install_path))
 
     def pre_install(self):
-        # return yesno('Install miniconda to ~/anaconda? [Y/n]')
-        return True
+        return yesno('Install miniconda to ~/anaconda? [Y/n]')
 
 
 class InstallCondaPackages(Task):
@@ -251,8 +257,8 @@ class CloneCustomCasutools(Task):
         return os.path.isdir(self.clone_path)
 
     def install(self):
-        sh('git clone https://github.com/NGTS/custom-casutools.git {}'.format(
-            self.clone_path))
+        sh('git clone https://github.com/NGTS/custom-casutools.git {path}'.format(
+            path=self.clone_path))
 
 
 class CompileSource(Task):
@@ -385,8 +391,7 @@ class InstallSysrem(Task):
         self.prefix = os.path.realpath(self.config['install_prefix'])
 
     def complete_condition(self):
-        return os.path.isfile(os.path.join(self.prefix, 'bin',
-            'sysrem'))
+        return os.path.isfile(os.path.join(self.prefix, 'bin', 'sysrem'))
 
     def install(self):
         with cd('sysrem'):
@@ -404,9 +409,7 @@ COMMON := -fopenmp -O2
                 outfile.write(text)
 
             sh('make -j {:d}'.format(cpu_count()))
-            sh('make install PREFIX={prefix}'.format(
-                prefix=self.prefix))
-
+            sh('make install PREFIX={prefix}'.format(prefix=self.prefix))
 
 
 class Pipeline(object):
