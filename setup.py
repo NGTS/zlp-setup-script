@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from __future__ import division, print_function, absolute_import
-import argparse
 import logging
 import readline
 from multiprocessing import cpu_count
@@ -438,10 +437,7 @@ is on your LD_LIBRARY_PATH'''.format(miniconda=miniconda,
     logger.info(text)
 
 
-def main(args):
-    if args.verbose:
-        logger.setLevel('DEBUG')
-
+def main():
     config = {
         'miniconda_install_path': os.path.expanduser('~/anaconda'),
         'test_data_tarball_path': 'source2015.tar.gz',
@@ -483,6 +479,4 @@ def main(args):
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser()
-    parser.add_argument('-v', '--verbose', action='store_true')
-    main(parser.parse_args())
+    main()
