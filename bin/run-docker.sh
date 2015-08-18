@@ -3,7 +3,7 @@
 set -eu
 
 main() {
-    docker run -v ${PWD}:/host $@
+    docker run -itv ${PWD}:/host $@
 }
 
 main "$@"
