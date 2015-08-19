@@ -6,11 +6,18 @@
 # backwards compatibility). Please don't change it unless you know what
 # you're doing.
 Vagrant.configure(2) do |config|
-  config.vm.box = "debian/jessie64"
-  config.vm.provision "ansible" do |ansible|
+  config.vm.provision 'ansible' do |ansible|
     ansible.playbook = 'site.yml'
   end
-  config.vm.provider "virtualbox" do |vb|
+  config.vm.provider 'virtualbox' do |vb|
     vb.cpus = 2
+  end
+
+  config.vm.define 'debian', primary: true do |debian|
+    debian.vm.box = 'debian/jessie64'
+  end
+
+  config.vm.define 'centos', autostart: false do |centos|
+    centos.vm.box = 'ramonsnir/chef-centos-6.7'
   end
 end
