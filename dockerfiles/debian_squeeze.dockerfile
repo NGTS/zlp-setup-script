@@ -3,6 +3,7 @@ FROM debian:squeeze
 MAINTAINER Simon Walker s.r.walker101@googlemail.com
 
 RUN apt-get update && apt-get install -y \
+        build-essential \
         bzip2 \
         g++ \
         gfortran \
