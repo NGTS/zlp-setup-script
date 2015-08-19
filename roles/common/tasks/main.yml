@@ -1,0 +1,9 @@
+---
+- name: Ensure .ssh dir exists
+  file: path=~/.ssh state=directory owner=vagrant group=vagrant mode=700
+
+- name: Ensure pipeline test dir exists
+  file: path=/pipeline state=directory owner=vagrant group=vagrant
+
+- name: Set up the vagrant users environment variables
+  copy: src=bashrc dest=/home/vagrant/.bashrc owner=vagrant group=vagrant

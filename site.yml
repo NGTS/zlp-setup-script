@@ -1,23 +1,7 @@
 ---
 - hosts: all
-  tasks:
-  - name: Install required packages
-    apt: name={{ item }} state=present update_cache=yes cache_valid_time=86400
-    with_items:
-    - git
-    - python
-    - wget
-    - pkg-config
-    - gfortran
-    - g++
-    become: yes
+  become: yes
+  roles:
+  - { role: debian, when ansible_distribution == 'Debian' }
+  - common
 
-  - name: Ensure .ssh dir exists
-    file: path=~/.ssh state=directory
-
-  - name: Ensure pipeline test dir exists
-    file: path=/pipeline state=directory owner=vagrant group=vagrant
-    become: true
-
-  - name: Set up the vagrant users environment variables
-    copy: src=files/bashrc dest=~/.bashrc

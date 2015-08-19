@@ -112,6 +112,7 @@ if ! shopt -oq posix; then
   fi
 fi
 
+
 # Set up pipeline variables
 export PATH=${HOME}/anaconda/bin:${PATH}:/pipeline/bin
 export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/pipeline/lib
