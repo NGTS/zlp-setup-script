@@ -87,6 +87,20 @@ def sh(command, shell=False):
         logger.debug('CMD: %s', ' '.join(cmd))
         sp.check_call(cmd)
 
+# Python2.6 does not have this. Straight copy from python2.7 stdlib
+def check_output(*popenargs, **kwargs):
+    if 'stdout' in kwargs:
+        raise ValueError('stdout argument not allowed, it will be overridden.')
+    process = sp.Popen(stdout=sp.PIPE, *popenargs, **kwargs)
+    output, unused_err = process.communicate()
+    retcode = process.poll()
+    if retcode:
+        cmd = kwargs.get("args")
+        if cmd is None:
+            cmd = popenargs[0]
+        raise sp.CalledProcessError(retcode, cmd, output=output)
+    return output
+
 
 class Task(object):
     __metaclass__ = ABCMeta
@@ -396,7 +410,7 @@ class InstallSysrem(Task):
     def install(self):
         with cd('sysrem'):
             # Add make variables for this system
-            hostname = sp.check_output(['hostname', '-s']).strip()
+            hostname = check_output(['hostname', '-s']).strip()
             text = '''CFITSIODIR := {prefix}
 CC := g++
 FORT := gfortran
