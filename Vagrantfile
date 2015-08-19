@@ -13,7 +13,7 @@ Vagrant.configure(2) do |config|
     vb.cpus = 2
   end
 
-  config.vm.define 'debian', primary: true do |debian|
+  config.vm.define 'debian' do |debian|
     debian.vm.box = 'debian/jessie64'
   end
 
