@@ -1,0 +1,11 @@
+---
+- name: Install required packages
+  yum: name={{ item }} update_cache=yes state=present
+  with_items:
+  - gcc
+  - gcc-c++
+  - gcc-gfortran
+  - git
+  - libselinux-python
+  - python
+  - wget
