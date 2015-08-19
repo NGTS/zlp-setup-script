@@ -283,7 +283,7 @@ class InstallCasutools(Task):
             sh('./configure --prefix={prefix} --with-wcs={prefix} '
                '--with-cfitsio={prefix}'.format(
                    prefix=self.install_location))
-            sh('make -j {:d}'.format(cpu_count()))
+            sh('make -j {0:d}'.format(cpu_count()))
             sh('make install')
 
 
@@ -318,7 +318,7 @@ class Compile(Task):
                 sh('./configure --prefix={prefix} {extra_args}'.format(
                     prefix=self.prefix,
                     extra_args=extra_args))
-                sh('make -j {:d}'.format(cpu_count()))
+                sh('make -j {0:d}'.format(cpu_count()))
                 sh('make install')
 
 
@@ -408,7 +408,7 @@ COMMON := -fopenmp -O2
                 hostname=hostname), 'w') as outfile:
                 outfile.write(text)
 
-            sh('make -j {:d}'.format(cpu_count()))
+            sh('make -j {0:d}'.format(cpu_count()))
             sh('make install PREFIX={prefix}'.format(prefix=self.prefix))
 
 
